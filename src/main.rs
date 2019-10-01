@@ -6,6 +6,7 @@ use minifb::{Window, WindowOptions};
 const WIDTH: usize = 640;
 const HEIGHT: usize = 360;
 
+#[derive(Clone, Copy)]
 struct Point {
     x: f32,
     y: f32,
@@ -17,6 +18,13 @@ impl Point {
     }
 }
 
+impl std::ops::AddAssign for Point {
+    fn add_assign(&mut self, other: Self) {
+        self.x += other.x;
+        self.y += other.y;
+    }
+}
+
 fn main() {
     let mut position = Point::new(0.0, 0.0);
     let mut velocity = Point::new(1.0, 1.0);
@@ -25,8 +33,7 @@ fn main() {
 
     let mut window = Window::new("Bounce", WIDTH, HEIGHT, WindowOptions::default()).unwrap();
     while window.is_open() {
-        position.x += velocity.x;
-        position.y += velocity.y;
+        position += velocity;
 
         if position.y < 0.0 {
             position.y = 0.0;
