@@ -31,9 +31,16 @@ fn main() {
 
     let mut frame_buffer = FrameBuffer::new(WIDTH, HEIGHT);
 
+    let a = Point::new(1.0, 0.0);
+    let b = Point::new(0.0, 1.0);
+    let input = vec![a, a, a, a, b, b, b, b];
+    let mut cycle = input.iter().cycle();
+
     let mut window = Window::new("Bounce", WIDTH, HEIGHT, WindowOptions::default()).unwrap();
     while window.is_open() {
         position += velocity;
+
+        velocity = cycle.next().unwrap().clone();
 
         if position.y < 0.0 {
             position.y = (HEIGHT - 1) as f32;
