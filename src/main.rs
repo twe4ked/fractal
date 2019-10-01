@@ -26,7 +26,7 @@ impl std::ops::AddAssign for Point {
 }
 
 fn main() {
-    let mut position = Point::new(0.0, 0.0);
+    let mut position = Point::new(WIDTH as f32 / 2.0, HEIGHT as f32 / 2.0);
     let mut velocity = Point::new(1.0, 1.0);
 
     let mut frame_buffer = FrameBuffer::new(WIDTH, HEIGHT);
