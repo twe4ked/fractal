@@ -36,23 +36,19 @@ fn main() {
         position += velocity;
 
         if position.y < 0.0 {
-            position.y = 0.0;
-            velocity.y = -velocity.y;
+            position.y = (HEIGHT - 1) as f32;
         }
 
         if position.x < 0.0 {
-            position.x = 0.0;
-            velocity.x = -velocity.x;
+            position.x = (WIDTH - 1) as f32;
         }
 
         if position.y >= (HEIGHT - 1) as f32 {
-            position.y = (HEIGHT - 1) as f32;
-            velocity.y = -velocity.y;
+            position.y = 0.0;
         }
 
         if position.x >= (WIDTH - 1) as f32 {
-            position.x = (WIDTH - 1) as f32;
-            velocity.x = -velocity.x;
+            position.x = 0.0;
         }
 
         frame_buffer.toggle_pixel(position.x as usize, position.y as usize);
