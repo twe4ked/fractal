@@ -3,8 +3,8 @@ mod frame_buffer;
 use frame_buffer::FrameBuffer;
 use minifb::{Window, WindowOptions};
 
-const WIDTH: usize = 400;
-const HEIGHT: usize = 400;
+const WIDTH: usize = 800;
+const HEIGHT: usize = 800;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 struct Point {
@@ -25,31 +25,67 @@ impl std::ops::AddAssign for Point {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Debug)]
+enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+}
+
+impl Direction {
+    fn point(&self) -> Point {
+        match self {
+            Direction::Up => Point::new(0.0, -1.0),
+            Direction::Down => Point::new(0.0, 1.0),
+            Direction::Left => Point::new(-1.0, 0.0),
+            Direction::Right => Point::new(1.0, 0.0),
+        }
+    }
+
+    fn turn_right(&self) -> Direction {
+        match self {
+            Direction::Up => Direction::Right,
+            Direction::Down => Direction::Left,
+            Direction::Left => Direction::Up,
+            Direction::Right => Direction::Down,
+        }
+    }
+
+    fn turn_left(&self) -> Direction {
+        match self {
+            Direction::Up => Direction::Left,
+            Direction::Down => Direction::Right,
+            Direction::Left => Direction::Down,
+            Direction::Right => Direction::Up,
+        }
+    }
+}
+
 fn main() {
     let mut position = Point::new(WIDTH as f32 / 2.0, HEIGHT as f32 / 2.0);
-    let mut velocity = Point::new(0.0, 0.0);
+    let mut direction = Direction::Left;
 
     let mut frame_buffer = FrameBuffer::new(WIDTH, HEIGHT);
 
-    // let input = vec![a, a, a, a, b, b, b, b];
-    // let mut cycle = input.iter().cycle();
     let mut i = 0;
     let mut j = 0;
 
     let mut window = Window::new("Bounce", WIDTH, HEIGHT, WindowOptions::default()).unwrap();
     while window.is_open() {
-        std::thread::sleep(std::time::Duration::from_millis(1));
+        // std::thread::sleep(std::time::Duration::from_millis(1));
 
-        if i % 10 == 0 {
-            velocity = if turn(j) {
-                turn_left(velocity)
+        if i % 4 == 0 {
+            direction = if turn_left_or_right(j) {
+                direction.turn_left()
             } else {
-                turn_right(velocity)
+                direction.turn_right()
             };
+
             j += 1;
         }
 
-        position += velocity;
+        position += direction.point();
 
         if position.y < 0.0 {
             position.y = (HEIGHT - 1) as f32;
@@ -75,37 +111,7 @@ fn main() {
     }
 }
 
-fn turn_left(point: Point) -> Point {
-    if point.x == 0.0 {
-        Point::new(if point.y > 0.0 { 1.0 } else { -1.0 }, 0.0)
-    } else if point.y == 0.0 {
-        Point::new(0.0, if point.x > 0.0 { -1.0 } else { 1.0 })
-    } else {
-        unreachable!()
-    }
-}
-
-fn turn_right(point: Point) -> Point {
-    if point.x == 0.0 {
-        Point::new(if point.y > 0.0 { -1.0 } else { 1.0 }, 0.0)
-    } else if point.y == 0.0 {
-        Point::new(0.0, if point.x > 0.0 { 1.0 } else { -1.0 })
-    } else {
-        unreachable!()
-    }
-}
-
-// fn turn_inner(point: Point, a: f32, b: f32) -> Point {
-//     if point.x == 0.0 {
-//         Point::new(if point.y > 0.0 { -1.0 } else { 1.0 }, 0.0)
-//     } else if point.y == 0.0 {
-//         Point::new(0.0, if point.x > 0.0 { 1.0 } else { -1.0 })
-//     } else {
-//         unreachable!()
-//     }
-// }
-
-fn turn(n: usize) -> bool {
+fn turn_left_or_right(n: usize) -> bool {
     let n = n as isize;
     (((n & -n) << 1) & n) != 0
 }
@@ -115,28 +121,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn turn_left_test() {
-        let up = Point::new(0.0, -1.0);
-        let down = Point::new(0.0, 1.0);
-        let left = Point::new(-1.0, 0.0);
-        let right = Point::new(1.0, 0.0);
+    fn turn_test() {
+        let up = Direction::Up;
+        let down = Direction::Down;
+        let left = Direction::Left;
+        let right = Direction::Right;
 
-        assert_eq!(turn_left(up), left);
-        assert_eq!(turn_left(down), right);
-        assert_eq!(turn_left(left), down);
-        assert_eq!(turn_left(right), up);
-    }
+        // Turn left
+        assert_eq!(up.turn_left(), left);
+        assert_eq!(down.turn_left(), right);
+        assert_eq!(left.turn_left(), down);
+        assert_eq!(right.turn_left(), up);
 
-    #[test]
-    fn turn_right_test() {
-        let up = Point::new(0.0, -1.0);
-        let down = Point::new(0.0, 1.0);
-        let left = Point::new(-1.0, 0.0);
-        let right = Point::new(1.0, 0.0);
-
-        assert_eq!(turn_right(up), right);
-        assert_eq!(turn_right(down), left);
-        assert_eq!(turn_right(left), up);
-        assert_eq!(turn_right(right), down);
+        // Turn right
+        assert_eq!(up.turn_right(), right);
+        assert_eq!(down.turn_right(), left);
+        assert_eq!(left.turn_right(), up);
+        assert_eq!(right.turn_right(), down);
     }
 }

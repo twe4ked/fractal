@@ -18,6 +18,9 @@ impl FrameBuffer {
 
     pub fn toggle_pixel(&mut self, x: usize, y: usize) {
         let l = y * self.width + x;
+        if l >= self.width * self.height {
+            return;
+        }
         assert!(l < self.width * self.height);
 
         if self.buffer[l] == ON {
